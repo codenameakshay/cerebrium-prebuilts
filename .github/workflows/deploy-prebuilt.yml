@@ -153,4 +153,5 @@ jobs:
         run: pip install cerebrium
 
       - name: Cerebrium deploy
-        run: cerebrium deploy ${{env.NAME}} --api-key ${{env.API_KEY}} --hardware ${{env.HARDWARE}} --cpu ${{env.CPU}} --memory ${{env.MEMORY}}
+        run: cerebrium deploy ${{github.event.inputs.name}} --api-key ${{env.API_KEY}} --hardware ${{github.event.inputs.hardware}} --cpu ${github.event.inputs.cpu}} --memory ${{github.event.inputs.memory}}
+

@@ -60,6 +60,8 @@ jobs:
 
       - name: Select Template Folder
         run: |
+          echo "Current Directory: $(pwd)"
+          echo "Availible Folders: $(ls -d */)"
           if [ -d ${{github.event.inputs.template_folder}} ]; then
             echo "Template Folder: ${{github.event.inputs.template_folder}}"
             cd ./${{github.event.inputs.template_folder}}
@@ -68,16 +70,18 @@ jobs:
             exit 1
           fi
 
+
       - name: check if config.yaml exists
         id: check_config
         uses: andstor/file-existence-action@v2
         with:
           files: "config.yaml"
 
-      # - name: Get deployment params from config.yaml
-      #   # if config.yaml exisits, read it and set the environment variables
-      #   if: steps.check_config.outputs.files_exists == 'true'
-      #   run: |
+      - name: Get deployment params from config.yaml
+        # if config.yaml exisits, read it and set the environment variables
+        if: steps.check_config.outputs.files_exists == 'true'
+        run: |
+          echo "config.yaml exists"
       #     sudo apt-get update
       #     sudo apt-get install yq -y
 
@@ -153,4 +157,4 @@ jobs:
 
       - name: Cerebrium deploy
         # run: cerebrium deploy ${{env.NAME}} --api-key ${{env.API_KEY}} --hardware ${{env.HARDWARE}} --cpu ${{env.CPU}} --memory ${{env.MEMORY}}
-        run: cerebrium deploy ${{github.event.inputs.name}} --api-key ${{env.API_KEY}} --hardware ${{github.event.inputs.hardware}} --cpu ${github.event.inputs.cpu}} --memory ${{github.event.inputs.memory}}
+        run: cerebrium deploy ${{github.event.inputs.name}} --api-key ${{env.API_KEY}} --hardware ${{github.event.inputs.hardware}} --cpu ${{github.event.inputs.cpu}} --memory ${{github.event.inputs.memory}}

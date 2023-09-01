@@ -52,6 +52,12 @@ jobs:
       - name: "Checkout"
         uses: actions/checkout@v2
 
+        # Set the working dir
+        # working-directory: ${{github.event.inputs.template_folder}} ???
+
+        # change dir into the provided template folder
+
+
       - name: Mask API-Key
         run: |
           API_KEY=$(jq -r '.inputs.api_key' $GITHUB_EVENT_PATH)
@@ -62,7 +68,7 @@ jobs:
         run: |
           export templatePath="$(pwd)/${{github.event.inputs.template_folder}}"
           echo "Template Path: $templatePath"
-          if [ -d templatePath ]; then
+          if [ -d $templatePath ]; then
             echo "Template Folder: ${{github.event.inputs.template_folder}}"
             cd ./${{github.event.inputs.template_folder}}
           else

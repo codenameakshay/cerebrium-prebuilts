@@ -60,7 +60,10 @@ jobs:
 
       - name: Select Template Folder
         run: |
-          if [ -d ${{github.event.inputs.template_folder}} ]; then
+          echo " current folder: $(pwd)"
+          echo "availible dirs: $(ls -l)"
+
+          if [ -d ./${{github.event.inputs.template_folder}} ]; then
             echo "Template Folder: ${{github.event.inputs.template_folder}}"
             cd ./${{github.event.inputs.template_folder}}
           else

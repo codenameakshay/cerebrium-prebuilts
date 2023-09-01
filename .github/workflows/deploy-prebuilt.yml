@@ -70,10 +70,11 @@ jobs:
         with:
           files: "config.yaml"
 
-      # - name: Get deployment params from config.yaml
-      #   # if config.yaml exisits, read it and set the environment variables
-      #   if: steps.check_config.outputs.files_exists == 'true'
-      #   run: |
+      - name: Get deployment params from config.yaml
+        # if config.yaml exisits, read it and set the environment variables
+        if: steps.check_config.outputs.files_exists == 'true'
+        run: |
+          echo "config.yaml exists"
       #     sudo apt-get update
       #     sudo apt-get install yq -y
 

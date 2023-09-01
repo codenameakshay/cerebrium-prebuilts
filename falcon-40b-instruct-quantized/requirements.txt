@@ -1,0 +1,5 @@
+transformers
+accelerate
+xformers
+einops
+auto-gptq

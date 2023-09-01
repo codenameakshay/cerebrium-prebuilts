@@ -1,0 +1,7 @@
+accelerate
+diffusers
+ftfy
+scipy
+torch
+bitsandbytes[gpu]
+transformers

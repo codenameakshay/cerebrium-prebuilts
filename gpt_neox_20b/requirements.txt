@@ -1,0 +1,6 @@
+transformers
+diffusers
+scipy
+ftfy
+accelerate
+triton

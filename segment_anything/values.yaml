@@ -1,0 +1,3 @@
+minReplicaCount: 0
+maxReplicaCount: 3
+queueLength: 3

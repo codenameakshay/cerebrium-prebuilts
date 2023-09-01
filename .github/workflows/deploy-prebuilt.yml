@@ -76,6 +76,10 @@ jobs:
             exit 1
           fi
 
+          echo "Current Directory: $(pwd)"
+          echo "Found the following files:"
+          ls ./
+
       - name: check if config.yaml exists
         id: check_config
         uses: andstor/file-existence-action@v2

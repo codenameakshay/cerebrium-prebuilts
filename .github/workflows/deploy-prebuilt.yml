@@ -60,7 +60,7 @@ jobs:
 
       - name: Select Template Folder
         run: |
-          export templatePath="$GITHUB_WORKSPACE/${{github.event.inputs.template_folder}}"
+          # export templatePath="$(pwd)/${{github.event.inputs.template_folder}}"
           echo "Template Path: $prebuiltPath"
           if [ -d templatePath ]; then
             echo "Template Folder: ${{github.event.inputs.template_folder}}"

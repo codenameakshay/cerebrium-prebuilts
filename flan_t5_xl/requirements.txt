@@ -1,0 +1,5 @@
+torch
+transformers
+accelerate
+transformers[sentencepiece]
+sentencepiece

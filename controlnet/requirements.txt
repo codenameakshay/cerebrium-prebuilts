@@ -1,0 +1,8 @@
+
+torch
+numpy
+pydantic
+diffusers==0.16.0
+transformers==4.28.1
+accelerate==0.18.0
+controlnet_aux==0.0.3

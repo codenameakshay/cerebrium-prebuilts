@@ -60,7 +60,7 @@ jobs:
           echo "Current Directory: $(pwd)"
           echo "Found the following files:"
           ls ./
-          if [ ${{github.event.client_payload.disable_build_logs}} ]; then
+          if [ "{${{github.event.client_payload.disable_build_logs}},,}" == 'true' ]; then
             echo "Hiding build logs"
             export buildParams="--hide-public-endpoint --disable_build_logs"
           else

@@ -2,14 +2,7 @@ name: "Deploy Prebuilt from POST"
 on:
   repository_dispatch:
     types: [deploy-prebuilt]
-
-env:
-  NAME: ""
-  API_KEY: ""
-  HARDWARE: "TURING_5000"
-  CPU: "2"
-  MEMORY: "14.5"
-
+    
 # Event should have the following:
 #   name: name of the deployment
 #   api_key: cerebrium api key
@@ -47,38 +40,58 @@ jobs:
       - name: Cerebrium deploy
         # run: cerebrium deploy ${{env.NAME}} --api-key ${{env.API_KEY}} --hardware ${{env.HARDWARE}} --cpu ${{env.CPU}} --memory ${{env.MEMORY}}
         run: |
-          export templatePath="$(pwd)/${{github.event.client_payload.template_folder}}"
-          echo "Template Path: $templatePath"
-          if [ -d $templatePath ]; then
-            echo "Template Folder: ${{github.event.client_payload.template_folder}}"
-            cd ./${{github.event.client_payload.template_folder}}
-          else
-            echo "Template Folder does not exist"
-            exit 1
-          fi
+            export templatePath="$(pwd)/${{github.event.client_payload.template_folder}}"
+            echo "Template Path: $templatePath"
+            if [ -d $templatePath ]; then
+                echo "Template Folder: ${{github.event.client_payload.template_folder}}"
+                cd ./${{github.event.client_payload.template_folder}}
+            else
+                echo "Template Folder does not exist"
+                exit 1
+            fi
 
-          echo "Current Directory: $(pwd)"
-          echo "Found the following files:"
-          ls ./
-          
-          echo ""
-          export buildParams="--hide-public-endpoint"
-          if [ ${{github.event.client_payload.hide_build_logs}} = "true" ] || [ ${{github.event.client_payload.hide_build_logs}} = "True" ]; then
-            echo "Hiding build logs"
-            export buildParams="--hide-public-endpoint $buildParams"
-          fi
+            echo "Current Directory: $(pwd)"
+            echo "Found the following files:"
+            ls ./
+            
+            echo ""
+            export buildParams="--hide-public-endpoint"
+            if [ ${{github.event.client_payload.hide_build_logs}} = "true" ] || [ ${{github.event.client_payload.hide_build_logs}} = "True" ]; then
+                echo "Hiding build logs"
+                export buildParams="--hide-public-endpoint $buildParams"
+            fi
 
-          export CONFIG_FILE='./config.yaml'
-          if [ -f $CONFIG_FILE ]; then
-            echo "Config file $CONFIG_FILE exists"
-            export buildParams="--config-file $CONFIG_FILE $buildParams"
-          fi
+            export CONFIG_FILE='./config.yaml'
+            if [ -f $CONFIG_FILE ]; then
+                echo "Config file $CONFIG_FILE exists"
+                export buildParams="--config-file $CONFIG_FILE $buildParams"
+            fi
 
-          echo ""
-          echo "-----------------------------------------"
-          echo "Deploying to Cerebrium..."
+            if [ ${{github.event.client_payload.name}} != "" ]; then
+                echo "Deployment name: ${{github.event.client_payload.name}}"
+                export buildParams="--name ${{github.event.client_payload.name}} $buildParams"
+            fi
 
-          echo "params:  ${{github.event.client_payload.name}} --api-key ${{env.API_KEY}} --hardware ${{github.event.client_payload.hardware}} --cpu ${{github.event.client_payload.cpu}} --memory ${{github.event.client_payload.memory}} $buildParams "
-          cerebrium deploy ${{github.event.client_payload.name}} --api-key '${{env.API_KEY}}' --hardware ${{github.event.client_payload.hardware}} --cpu ${{github.event.client_payload.cpu}} --memory ${{github.event.client_payload.memory}} $buildParams
+            if [ ${{github.event.client_payload.hardware}} != "" ]; then
+                echo "Hardware: ${{github.event.client_payload.hardware}}"
+                export buildParams="--hardware ${{github.event.client_payload.hardware}} $buildParams"
+            fi
+
+            if [ ${{github.event.client_payload.cpu}} != "" ]; then
+                echo "CPU: ${{github.event.client_payload.cpu}}"
+                export buildParams="--cpu ${{github.event.client_payload.cpu}} $buildParams"
+            fi
+
+            if [ ${{github.event.client_payload.memory}} != "" ]; then
+                echo "Memory: ${{github.event.client_payload.memory}}"
+                export buildParams="--memory ${{github.event.client_payload.memory}} $buildParams"
+            fi
+
+            echo ""
+            echo "-----------------------------------------"
+            echo "Deploying to Cerebrium..."
+
+            echo "params:  $buildParams "
+            cerebrium deploy --api-key '${{env.API_KEY}}' $buildParams
 
           

@@ -63,8 +63,7 @@ jobs:
           
           echo ""
 
-          echo "comparing: {${{github.event.client_payload.disable_build_logs}},,} = 'true'"
-          if [ "{${{github.event.client_payload.disable_build_logs}},,}" = 'true' ]; then
+          if [ "${{github.event.client_payload.disable_build_logs}}" = "true" ] || [ "${{github.event.client_payload.disable_build_logs}}" = "True" ]; then
             echo "Hiding build logs"
             export buildParams="--hide-public-endpoint --disable_build_logs"
           else
@@ -78,3 +77,5 @@ jobs:
           echo "params:  ${{github.event.client_payload.name}} --api-key ${{env.API_KEY}} --hardware ${{github.event.client_payload.hardware}} --cpu ${{github.event.client_payload.cpu}} --memory ${{github.event.client_payload.memory}} $buildParams "
 
           cerebrium deploy ${{github.event.client_payload.name}} --api-key ${{env.API_KEY}} --hardware ${{github.event.client_payload.hardware}} --cpu ${{github.event.client_payload.cpu}} --memory ${{github.event.client_payload.memory}} $buildParams
+
+          

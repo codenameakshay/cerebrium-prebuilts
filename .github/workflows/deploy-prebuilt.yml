@@ -88,11 +88,11 @@ jobs:
           echo "Found the following files:"
           ls ./
 
-          export buildParams="--hide-public-endpoint"
+          export buildParams=""
 
-          if [ ${{github.event.inputs.hide_build_logs}} = "true" ] || [ ${{github.event.inputs.hide_build_logs}} = "True" ]; then
+          if [ ${{github.event.inputs.disable_build_logs}} = "true" ] || [ ${{github.event.inputs.disable_build_logs}} = "True" ]; then
             echo "Hiding build logs"
-            export buildParams="--hide-public-endpoint $buildParams"
+            export buildParams="--disable_build_logs $buildParams"
           fi
 
           export CONFIG_FILE='./config.yaml'
@@ -120,11 +120,11 @@ jobs:
             echo "Name: ${{github.event.inputs.name}}"
             export buildParams="${{github.event.inputs.name}} $buildParams"
           fi
-          
+
           echo ""
           echo "-----------------------------------------"
           echo "Deploying to Cerebrium..."
 
           echo "using params:  $buildParams "
-          cerebrium deploy --api-key '${{env.API_KEY}}' $buildParams
+          cerebrium deploy --api-key '${{env.API_KEY}}' $buildParams --hide-public-endpoint
   

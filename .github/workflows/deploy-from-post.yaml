@@ -55,10 +55,10 @@ jobs:
             ls ./
             
             echo ""
-            export buildParams="--hide-public-endpoint"
-            if [ ${{github.event.client_payload.hide_build_logs}} = "true" ] || [ ${{github.event.client_payload.hide_build_logs}} = "True" ]; then
+            export buildParams=""
+            if [ ${{github.event.client_payload.disable_build_logs}} = "true" ] || [ ${{github.event.client_payload.disable_build_logs}} = "True" ]; then
                 echo "Hiding build logs"
-                export buildParams="--hide-public-endpoint $buildParams"
+                export buildParams="--disable_build_logs $buildParams"
             fi
 
             export CONFIG_FILE='./config.yaml'
@@ -92,6 +92,6 @@ jobs:
             echo "Deploying to Cerebrium..."
 
             echo "params:  $buildParams "
-            cerebrium deploy --api-key '${{env.API_KEY}}' $buildParams
+            cerebrium deploy --api-key '${{env.API_KEY}}' $buildParams --hide-public-endpoint
 
           

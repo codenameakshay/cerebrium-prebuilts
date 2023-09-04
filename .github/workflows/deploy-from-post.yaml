@@ -2,7 +2,7 @@ name: "Deploy Prebuilt from POST"
 on:
   repository_dispatch:
     types: [deploy-prebuilt]
-    
+
 # Event should have the following:
 #   name: name of the deployment
 #   api_key: cerebrium api key
@@ -67,11 +67,6 @@ jobs:
                 export buildParams="--config-file $CONFIG_FILE $buildParams"
             fi
 
-            if [ ${{github.event.client_payload.name}} != "" ]; then
-                echo "Deployment name: ${{github.event.client_payload.name}}"
-                export buildParams="--name ${{github.event.client_payload.name}} $buildParams"
-            fi
-
             if [ ${{github.event.client_payload.hardware}} != "" ]; then
                 echo "Hardware: ${{github.event.client_payload.hardware}}"
                 export buildParams="--hardware ${{github.event.client_payload.hardware}} $buildParams"
@@ -85,6 +80,11 @@ jobs:
             if [ ${{github.event.client_payload.memory}} != "" ]; then
                 echo "Memory: ${{github.event.client_payload.memory}}"
                 export buildParams="--memory ${{github.event.client_payload.memory}} $buildParams"
+            fi
+
+            if [ ${{github.event.client_payload.name}} != "" ]; then
+                echo "Deployment name: ${{github.event.client_payload.name}}"
+                export buildParams="${{github.event.client_payload.name}} $buildParams"
             fi
 
             echo ""

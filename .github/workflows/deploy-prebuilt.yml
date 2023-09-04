@@ -101,11 +101,6 @@ jobs:
             export buildParams="--config-file $CONFIG_FILE $buildParams"
           fi
 
-          if [ ${{github.event.inputs.name}} ]; then
-            echo "Name: ${{github.event.inputs.name}}"
-            export buildParams="--name ${{github.event.inputs.name}} $buildParams"
-          fi
-
           if [ ${{github.event.inputs.hardware}} ]; then
             echo "Hardware: ${{github.event.inputs.hardware}}"
             export buildParams="--hardware ${{github.event.inputs.hardware}} $buildParams"
@@ -121,6 +116,11 @@ jobs:
             export buildParams="--memory ${{github.event.inputs.memory}} $buildParams"
           fi
 
+          if [ ${{github.event.inputs.name}} ]; then
+            echo "Name: ${{github.event.inputs.name}}"
+            export buildParams="${{github.event.inputs.name}} $buildParams"
+          fi
+          
           echo ""
           echo "-----------------------------------------"
           echo "Deploying to Cerebrium..."

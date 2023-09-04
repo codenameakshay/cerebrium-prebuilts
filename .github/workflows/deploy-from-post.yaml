@@ -56,7 +56,7 @@ jobs:
             
             echo ""
             export buildParams=" "
-            if [ ${{github.event.client_payload.disable_build_logs}} == "true" ] || [ ${{github.event.client_payload.disable_build_logs}} == "True" ]; then
+            if [ "${{github.event.client_payload.disable_build_logs}}" == "true" ] || [ "${{github.event.client_payload.disable_build_logs}}" == "True" ]; then
                 echo "Hiding build logs"
                 export buildParams="--disable_build_logs $buildParams"
             fi

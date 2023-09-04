@@ -61,6 +61,12 @@ env:
 jobs:
   deploy-model:
     runs-on: ubuntu-latest
+    env:
+      NAME: ${{github.event.inputs.name}}
+      API_KEY: ${{github.event.inputs.api_key}}
+      HARDWARE: ${{github.event.inputs.hardware}}
+      CPU: ${{github.event.inputs.cpu}}
+      MEMORY: ${{github.event.inputs.memory}}
     steps:
       - name: "Checkout"
         uses: actions/checkout@v2
@@ -100,12 +106,20 @@ jobs:
           echo CPU=${{steps.parse_yaml.outputs.cpu}} >> $GITHUB_ENV
           echo MEMORY=${{steps.parse_yaml.outputs.memory}} >> $GITHUB_ENV
 
+          echo "YAML VARS:"
+          echo "NAME=${{steps.parse_yaml.outputs.name}}"
+          echo "HARDWARE=${{steps.parse_yaml.outputs.hardware}}"
+          echo "CPU=${{steps.parse_yaml.outputs.cpu}}"
+          echo "MEMORY=${{steps.parse_yaml.outputs.memory}}"
+
           echo "ENV VARS:"
           echo "NAME=${{env.NAME}}"
           echo "HARDWARE=${{env.hardware}}"
           echo "CPU=${{env.cpu}}"
           echo "MEMORY=${{env.memory}}"
           
+
+
           
       - name: Debug
         run: |

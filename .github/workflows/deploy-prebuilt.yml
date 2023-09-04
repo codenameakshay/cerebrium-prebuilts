@@ -57,7 +57,6 @@ env:
   HARDWARE: ${{github.event.inputs.hardware}}
   CPU: ${{github.event.inputs.cpu}}
   MEMORY: ${{github.event.inputs.memory}}
-  CONFIG_FILE: $(pwd)/${{github.event.inputs.template_folder}}/config.yaml
 
 jobs:
   deploy-model:
@@ -112,7 +111,7 @@ jobs:
             export buildParams="--hide-public-endpoint $buildParams"
           fi
 
-          echo "CONFIG_FILE: $CONFIG_FILE"
+          export CONFIG_FILE="./cerebrium.yaml"
           if [ -f $CONFIG_FILE ]; then
             echo "Config file $CONFIG_FILE exists"
             export buildParams="--config-file $CONFIG_FILE $buildParams"

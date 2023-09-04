@@ -1,8 +1,7 @@
 %YAML 1.2
 ---
 cpu: 2
-dedicated: dreambooth
-disable_animation: false
+disable_animation: true
 exclude: '[./.*, ./__*]'
 hardware: AMPERE_A5000
 include: '[./*, main.py, requirements.txt, pkglist.txt, conda_pkglist.txt]'

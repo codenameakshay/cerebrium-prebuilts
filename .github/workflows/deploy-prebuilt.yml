@@ -57,6 +57,7 @@ env:
   HARDWARE: ${{github.event.inputs.hardware}}
   CPU: ${{github.event.inputs.cpu}}
   MEMORY: ${{github.event.inputs.memory}}
+  CONFIG_FILE: $(pwd)/${{github.event.inputs.template_folder}}/config.yaml
 
 jobs:
   deploy-model:
@@ -82,6 +83,12 @@ jobs:
           echo ::add-mask::$API_KEY
           echo API_KEY=$API_KEY >> $GITHUB_ENV
 
+      - name: check if config.yaml exists
+        id: check_config
+        uses: andstor/file-existence-action@v2
+        with:
+          files:  $(pwd)/${{github.event.inputs.template_folder}}/config.yaml
+
       - name: Install Cerebrium
         run: pip install cerebrium
 
@@ -101,12 +108,19 @@ jobs:
           echo "Current Directory: $(pwd)"
           echo "Found the following files:"
           ls ./
+
+          echo ""
+
+          export buildParams="--hide-public-endpoint"
+
           if [ ${{github.event.inputs.hide_build_logs}} == "true" ]; then
             echo "Hiding build logs"
-            export buildParams="--hide-public-endpoint --hide-build-logs"
-          else
-            export buildParams="--hide-public-endpoint"
+            export buildParams="--hide-public-endpoint $buildParams"
           fi
 
-          cerebrium deploy ${{github.event.inputs.name}} --config-file $(pwd)/${{github.event.inputs.template_folder}}/config.yaml --api-key ${{env.API_KEY}} --hardware ${{github.event.inputs.hardware}} --cpu ${{github.event.inputs.cpu}} --memory ${{github.event.inputs.memory}} $buildParams
+          if [ ${{steps.check_config.outputs.files_exists}} = "true" ]; then
+            echo "Config file $CONFIG_FILE exists"
+            export buildParams="--config-file $(pwd)/${{github.event.inputs.template_folder}}/config.yaml $buildParams"
+
+          cerebrium deploy ${{github.event.inputs.name}} --api-key ${{env.API_KEY}} --hardware ${{github.event.inputs.hardware}} --cpu ${{github.event.inputs.cpu}} --memory ${{github.event.inputs.memory}} $buildParams
   

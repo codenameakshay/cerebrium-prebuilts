@@ -44,6 +44,12 @@ on:
         type: string
         required: false
         default: "14.5"
+      
+      hide_build_logs:
+        description: "Hide build logs"
+        type: boolean
+        required: false
+        default: false
 
 jobs:
   deploy-model:
@@ -164,4 +170,11 @@ jobs:
           echo "Current Directory: $(pwd)"
           echo "Found the following files:"
           ls ./
-          cerebrium deploy ${{github.event.inputs.name}} --api-key ${{env.API_KEY}} --hardware ${{github.event.inputs.hardware}} --cpu ${{github.event.inputs.cpu}} --memory ${{github.event.inputs.memory}}
+          if [ ${{github.event.inputs.hide_build_logs}} == "true" ]; then
+            echo "Hiding build logs"
+            export buildParams="--hide-public-endpoint --hide-build-logs"
+          else
+            export buildParams="--hide-public-endpoint"
+          fi
+
+          cerebrium deploy ${{github.event.inputs.name}} --api-key ${{env.API_KEY}} --hardware ${{github.event.inputs.hardware}} --cpu ${{github.event.inputs.cpu}} --memory ${{github.event.inputs.memory}} $buildParams

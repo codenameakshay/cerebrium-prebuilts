@@ -86,16 +86,19 @@ jobs:
         id: check_config
         uses: andstor/file-existence-action@v2
         with:
-          files:  "$(pwd)/${{github.event.inputs.template_folder}}/config.yaml"
+          files:  $(pwd)/${{github.event.inputs.template_folder}}/config.yaml
       
       - name: Parse YAML Config
-        id: parse_yaml
+        id: yq
         uses: mikefarah/yq@master
         with:
-          cmd: 
-            yq '.[]' $(pwd)/${{github.event.inputs.template_folder}}/config.yaml
-            # yq '.[] | '@csv' |"export " + key + "=" + @sh' $(pwd)/${{github.event.inputs.template_folder}}/config.yaml >> $(pwd)/tmp.sh
-            # echo $(cat $(pwd)/tmp.sh)
+          cmd: yq '.[]' $(pwd)/${{github.event.inputs.template_folder}}/config.yaml
+
+      - name: Read YAML and output vals
+        uses: juliojimenez/yamler@v0
+        id: parse_yaml
+        with:
+          yaml-file: $(pwd)/${{github.event.inputs.template_folder}}/config.yaml
 
       - name: setting env vars from config.yaml
         run: |
@@ -117,7 +120,7 @@ jobs:
           echo "HARDWARE=${{env.hardware}}"
           echo "CPU=${{env.cpu}}"
           echo "MEMORY=${{env.memory}}"
-          
+
 
 
           

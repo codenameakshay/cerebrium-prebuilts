@@ -144,80 +144,94 @@ jobs:
           echo "CPU: ${{env.CPU}}"
           echo "MEMORY: ${{env.MEMORY}}"
 
+
+      - name: read all vars from yaml with yq
+        id: read_yaml
+        uses: mikefarah/yq@master
+        with:
+          cmd: yq eval ${{env.FOLDER}}/config.yaml  
+
+      - name: echo yaml output
+        run: |
+          echo "${{steps.read_yaml.outputs.*}}"
+          echo " Name: ${{steps.read_yaml.outputs.name}}"
+          echo " Hardware: ${{steps.read_yaml.outputs.hardware}}"
+          echo " CPU: ${{steps.read_yaml.outputs.cpu}}"
+          echo " Memory: ${{steps.read_yaml.outputs.memory}}"
+
       - name: Get deployment params from config yaml
         if: steps.check_config.outputs.files_exists == 'true'
-        run: |
-          sudo apt-get update
-          sudo apt-get install yq -y
-        
-          cd ${{env.FOLDER}}
+        uses: mikefarah/yq@master
+        with :
+          cmd: |
+            cd ${{env.FOLDER}}
 
-          # set all the inputs as environment variables
-          if [ ${{github.event.inputs.name}} == "None" ]; then
-            echo "name is not set"
-            # setting name to repo name
-            echo NAME=${{github.repository}} >> $GITHUB_ENV
-          else
-            echo "name is set"
-            echo NAME=${{github.event.inputs.name}} >> $GITHUB_ENV
-          fi
+            # set all the inputs as environment variables
+            if [ ${{github.event.inputs.name}} == "None" ]; then
+              echo "name is not set"
+              # setting name to repo name
+              echo NAME=${{github.repository}} >> $GITHUB_ENV
+            else
+              echo "name is set"
+              echo NAME=${{github.event.inputs.name}} >> $GITHUB_ENV
+            fi
 
-          # setting hardware to TURING_5000 as default
-          echo HARDWARE=TURING_5000 >> $GITHUB_ENV
-          if [ ${{github.event.inputs.hardware}} == "None" ]; then
-            echo "hardware is not set"
-            if [ -f config.yaml ]; then
-              echo "Looking for hardware in config.yaml"
-              hardware=$(yq eval '.hardware' config.yaml)
-              if [ $hardware != "null" ]; then
-                echo "hardware is set in config to: $hardware"
-                echo HARDWARE=$hardware >> $GITHUB_ENV
+            # setting hardware to TURING_5000 as default
+            echo HARDWARE=TURING_5000 >> $GITHUB_ENV
+            if [ ${{github.event.inputs.hardware}} == "None" ]; then
+              echo "hardware is not set"
+              if [ -f config.yaml ]; then
+                echo "Looking for hardware in config.yaml"
+                hardware=$(yq eval '.hardware' config.yaml)
+                if [ $hardware != "null" ]; then
+                  echo "hardware is set in config to: $hardware"
+                  echo HARDWARE=$hardware >> $GITHUB_ENV
+                fi
+              else
+                echo "hardware set to default of TURING_5000"
               fi
             else
-              echo "hardware set to default of TURING_5000"
+              echo "hardware is set in inputs"
+              echo HARDWARE=${{github.event.inputs.hardware}} >> $GITHUB_ENV
             fi
-          else
-            echo "hardware is set in inputs"
-            echo HARDWARE=${{github.event.inputs.hardware}} >> $GITHUB_ENV
-          fi
 
-          # setting cpu to 2 as default
-          echo CPU=2 >> $GITHUB_ENV
-          if [ ${{github.event.inputs.cpu}} == "None" ]; then
-            echo "cpu is not set"
-            if [ -f config.yaml ]; then
-              echo "Looking for cpu in config.yaml"
-              cpu=$(yq eval '.cpu' config.yaml)
-              if [ $cpu != "null" ]; then
-                echo "cpu is set in config to: $cpu"
-                echo CPU=$cpu >> $GITHUB_ENV
+            # setting cpu to 2 as default
+            echo CPU=2 >> $GITHUB_ENV
+            if [ ${{github.event.inputs.cpu}} == "None" ]; then
+              echo "cpu is not set"
+              if [ -f config.yaml ]; then
+                echo "Looking for cpu in config.yaml"
+                cpu=$(yq eval '.cpu' config.yaml)
+                if [ $cpu != "null" ]; then
+                  echo "cpu is set in config to: $cpu"
+                  echo CPU=$cpu >> $GITHUB_ENV
+                fi
+              else
+                echo "cpu set to default of 2"
               fi
             else
-              echo "cpu set to default of 2"
+              echo "cpu is set in inputs"
+              echo CPU=${{github.event.inputs.cpu}} >> $GITHUB_ENV
             fi
-          else
-            echo "cpu is set in inputs"
-            echo CPU=${{github.event.inputs.cpu}} >> $GITHUB_ENV
-          fi
 
-          # setting memory to 14.5 as default
-          echo MEMORY=14.5 >> $GITHUB_ENV
-          if [ ${{github.event.inputs.memory}} == "None" ]; then
-            echo "memory is not set"
-            if [ -f config.yaml ]; then
-              echo "Looking for memory in config.yaml"
-              memory=$(yq eval '.memory' config.yaml)
-              if [ $memory != "null" ]; then
-                echo "memory is set in config to: $memory"
-                echo MEMORY=$memory >> $GITHUB_ENV
+            # setting memory to 14.5 as default
+            echo MEMORY=14.5 >> $GITHUB_ENV
+            if [ ${{github.event.inputs.memory}} == "None" ]; then
+              echo "memory is not set"
+              if [ -f config.yaml ]; then
+                echo "Looking for memory in config.yaml"
+                memory=$(yq eval '.memory' config.yaml)
+                if [ $memory != "null" ]; then
+                  echo "memory is set in config to: $memory"
+                  echo MEMORY=$memory >> $GITHUB_ENV
+                fi
+              else
+                echo "memory set to default of 14.5"
               fi
             else
-              echo "memory set to default of 14.5"
+              echo "memory is set in inputs"
+              echo MEMORY=${{github.event.inputs.memory}} >> $GITHUB_ENV
             fi
-          else
-            echo "memory is set in inputs"
-            echo MEMORY=${{github.event.inputs.memory}} >> $GITHUB_ENV
-          fi
       - name: test ENV changed
         run: |
           echo "NAME: ${{env.NAME}}"

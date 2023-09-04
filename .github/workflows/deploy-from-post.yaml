@@ -62,10 +62,8 @@ jobs:
           ls ./
           
           echo ""
-          echo "Comparing:  ${{github.event.client_payload.disable_build_logs}} = 'true'"
-
           if [ "${{github.event.client_payload.disable_build_logs}}" = "true" ] || [ "${{github.event.client_payload.disable_build_logs}}" = "True" ]; then
-            echo "Hiding build logs"
+            echo "Hiding build logs..."
             export buildParams="--hide-public-endpoint --disable-build-logs"
           else
             export buildParams="--hide-public-endpoint"

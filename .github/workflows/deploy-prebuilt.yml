@@ -87,7 +87,7 @@ jobs:
           echo "Found the following files:"
           ls ./
 
-          export buildParams=" "
+          export buildParams="--"
           if [ "${{github.event.inputs.disable_build_logs}}" == "true" ] || [ "${{github.event.inputs.disable_build_logs}}" == "True" ]; then
             echo "Hiding build logs"
             export buildParams="--disable_build_logs $buildParams"

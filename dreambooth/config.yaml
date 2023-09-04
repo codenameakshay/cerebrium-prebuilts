@@ -1,7 +1,6 @@
 %YAML 1.2
 ---
 cpu: 2
-dedicated: dreambooth
 disable_animation: false
 exclude: '[./.*, ./__*]'
 hardware: AMPERE_A5000

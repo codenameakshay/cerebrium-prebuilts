@@ -70,10 +70,9 @@ jobs:
 
         # change dir into the provided template folder
 
-
       - name: Mask API-Key
         run: |
-          API_KEY=$(jq -r '.inputs.api_key' $GITHUB_EVENT_PATH)
+          API_KEY=$(yq -r '.inputs.api_key' $GITHUB_EVENT_PATH)
           echo ::add-mask::$API_KEY
           echo API_KEY=$API_KEY >> $GITHUB_ENV
 
@@ -81,80 +80,120 @@ jobs:
         id: check_config
         uses: andstor/file-existence-action@v2
         with:
-          files: "config.yaml"
+          files:  "$(pwd)/${{github.event.inputs.template_folder}}/config.yaml"
+      
+      - name: Parse YAML Config
+        id: parse_yaml
+        uses: mikefarah/yq@master
+        with:
+          cmd: 
+            yq '.[]' $(pwd)/${{github.event.inputs.template_folder}}/config.yaml
+            # yq '.[] | '@csv' |"export " + key + "=" + @sh' $(pwd)/${{github.event.inputs.template_folder}}/config.yaml >> $(pwd)/tmp.sh
+            # echo $(cat $(pwd)/tmp.sh)
+
+      - name: setting env vars from config.yaml
+        run: |
+          echo "Setting env vars from config.yaml"
+          echo NAME=${{steps.parse_yaml.outputs.name}} >> $GITHUB_ENV
+          # echo NAME=$({{steps.parse_yaml.outputs.name}}) >> $GITHUB_ENV
+          echo HARDWARE=${{steps.parse_yaml.outputs.hardware}} >> $GITHUB_ENV
+          echo CPU=${{steps.parse_yaml.outputs.cpu}} >> $GITHUB_ENV
+          echo MEMORY=${{steps.parse_yaml.outputs.memory}} >> $GITHUB_ENV
+
+          echo "ENV VARS:"
+          echo "NAME=${{env.NAME}}"
+          echo "HARDWARE=${{env.hardware}}"
+          echo "CPU=${{env.cpu}}"
+          echo "MEMORY=${{env.memory}}"
+          
+          
+      - name: Debug
+        run: |
+          echo "ENV VARS:"
+          echo "NAME=${{env.NAME}}"
+          echo "HARDWARE=${{env.hardware}}"
+          echo "CPU=${{env.cpu}}"
+          echo "MEMORY=${{env.memory}}"
+
 
       - name: Get deployment params from config.yaml
         # if config.yaml exisits, read it and set the environment variables
         if: steps.check_config.outputs.files_exists == 'true'
         run: |
           sudo apt-get update
-          sudo apt-get install jq -y
+          sudo apt-get install yq -y
+          
+          if $([ ${{github.event.inputs.template_folder}} ]; then
+            export CONFIG_PATH="$(pwd)/${{github.event.inputs.template_folder}}/config.yaml"
+          else
+            export CONFIG_PATH="$(pwd)/config.yaml")
+          fi
 
           # set all the inputs as environment variables
-          if [ ${{github.event.inputs.name}} == "None" ]; then
+          if [ ${{github.event.inputs.name}} = "None" ]; then
             echo "name is not set"
             # setting name to repo name
-            echo "NAME=${{github.repository}}" >> $GITHUB_ENV
+            echo NAME=$([ ${{steps.parse_yaml.name}} ] && ${{steps.parse_yaml.name}} || "prebuilts-${{github.event.inputs.template_folder}}"") >> $GITHUB_ENV
           else
             echo "name is set"
-            echo "NAME=${{github.event.inputs.name}}" >> $GITHUB_ENV
+            echo NAME=${{github.event.inputs.name}} >> $GITHUB_ENV
           fi
 
           # setting hardware to TURING_5000 as default
-          echo "HARDWARE=TURING_5000" >> $GITHUB_ENV
-          if [ ${{github.event.inputs.hardware}} == "None" ]; then
+          echo HARDWARE=TURING_5000 >> $GITHUB_ENV
+          if [ ${{github.event.inputs.hardware}} = "None" ]; then
             echo "hardware is not set"
-            if [ -f config.yaml ]; then
+            if [ -f $CONFIG_PATH ]; then
               echo "Looking for hardware in config.yaml"
-              hardware=$(jq eval '.hardware' config.yaml)
+              hardware=$(yq eval '.hardware' $CONFIG_PATH)
               if [ $hardware != "null" ]; then
                 echo "hardware is set in config to: $hardware"
-                echo "HARDWARE=$hardware" >> $GITHUB_ENV
+                echo HARDWARE=$hardware >> $GITHUB_ENV
               fi
             else
               echo "hardware set to default of TURING_5000"
             fi
           else
             echo "hardware is set in inputs"
-            echo "HARDWARE=${{github.event.inputs.hardware}}" >> $GITHUB_ENV
+            echo HARDWARE=${{github.event.inputs.hardware}} >> $GITHUB_ENV
           fi
 
           # setting cpu to 2 as default
-          echo "CPU=2" >> $GITHUB_ENV
-          if [ ${{github.event.inputs.cpu}} == "None" ]; then
+          echo CPU=2 >> $GITHUB_ENV
+          if [ ${{github.event.inputs.cpu}} = "" ]; then
             echo "cpu is not set"
-            if [ -f config.yaml ]; then
+            if [ -f $CONFIG_PATH ]; then
               echo "Looking for cpu in config.yaml"
-              cpu=$(jq eval '.cpu' config.yaml)
+              cpu=$(yq eval '.cpu' $CONFIG_PATH)
               if [ $cpu != "null" ]; then
                 echo "cpu is set in config to: $cpu"
-                echo "CPU=$cpu" >> $GITHUB_ENV
+                echo CPU=$cpu >> $GITHUB_ENV
               fi
             else
               echo "cpu set to default of 2"
             fi
           else
             echo "cpu is set in inputs"
-            echo "CPU=${{github.event.inputs.cpu}}" >> $GITHUB_ENV
+            echo CPU=${{github.event.inputs.cpu}} >> $GITHUB_ENV
           fi
 
           # setting memory to 14.5 as default
-          echo "MEMORY=14.5" >> $GITHUB_ENV
-          if [ ${{github.event.inputs.memory}} == "None" ]; then
+          echo MEMORY=14.5 >> $GITHUB_ENV
+          if [ ${{github.event.inputs.memory}} = "" ]; then
             echo "memory is not set"
-            if [ -f config.yaml ]; then
+            if [ -f $CONFIG_PATH ]; then
               echo "Looking for memory in config.yaml"
-              memory=$(jq eval '.memory' config.yaml)
+              memory=$(yq eval '.memory' $CONFIG_PATH)
               if [ $memory != "null" ]; then
                 echo "memory is set in config to: $memory"
-                echo "MEMORY=$memory" >> $GITHUB_ENV
+                echo MEMORY=$memory >> $GITHUB_ENV
               fi
             else
               echo "memory set to default of 14.5"
             fi
           else
             echo "memory is set in inputs"
-            echo "MEMORY=${{github.event.inputs.memory}}" >> $GITHUB_ENV
+            echo MEMORY=${{github.event.inputs.memory}} >> $GITHUB_ENV
           fi
 
       - name: Install Cerebrium

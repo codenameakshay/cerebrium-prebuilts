@@ -35,11 +35,11 @@ jobs:
       - name: "Checkout"
         uses: actions/checkout@v2
 
-      # - name: Mask API-Key
-      #   run: |
-      #     API_KEY=$(jq -r '.event.client_payload.api_key' $GITHUB_EVENT_PATH)
+      - name: Mask API-Key
+        run: |
+          API_KEY=$(jq -r '.event.client_payload.api_key' $GITHUB_EVENT_PATH)
       #     echo ::add-mask::$API_KEY
-      #     echo API_KEY=$API_KEY >> $GITHUB_ENV
+          echo API_KEY=$API_KEY >> $GITHUB_ENV
 
       - name: Install Cerebrium
         run: pip install cerebrium

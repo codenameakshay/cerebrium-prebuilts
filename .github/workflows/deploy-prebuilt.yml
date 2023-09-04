@@ -102,19 +102,18 @@ jobs:
           echo "Found the following files:"
           ls ./
 
-          echo ""
-
           export buildParams="--hide-public-endpoint"
 
-          if [ ${{github.event.inputs.hide_build_logs}} == "true" ]; then
+          if [ ${{github.event.inputs.hide_build_logs}} = "true" ] || [ ${{github.event.inputs.hide_build_logs}} = "True" ]; then
             echo "Hiding build logs"
             export buildParams="--hide-public-endpoint $buildParams"
           fi
 
-          export CONFIG_FILE="./cerebrium.yaml"
+          export CONFIG_FILE='./cerebrium.yaml'
           if [ -f $CONFIG_FILE ]; then
             echo "Config file $CONFIG_FILE exists"
             export buildParams="--config-file $CONFIG_FILE $buildParams"
+          fi
 
           cerebrium deploy ${{github.event.inputs.name}} --api-key ${{env.API_KEY}} --hardware ${{github.event.inputs.hardware}} --cpu ${{github.event.inputs.cpu}} --memory ${{github.event.inputs.memory}} $buildParams
   

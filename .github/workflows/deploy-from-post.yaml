@@ -62,11 +62,16 @@ jobs:
           ls ./
           
           echo ""
-          if [ "${{github.event.client_payload.disable_build_logs}}" = "true" ] || [ "${{github.event.client_payload.disable_build_logs}}" = "True" ]; then
-            echo "Hiding build logs..."
-            export buildParams="--hide-public-endpoint --disable-build-logs"
-          else
-            export buildParams="--hide-public-endpoint"
+          export buildParams="--hide-public-endpoint"
+          if [ ${{github.event.client_payload.hide_build_logs}} = "true" ] || [ ${{github.event.client_payload.hide_build_logs}} = "True" ]; then
+            echo "Hiding build logs"
+            export buildParams="--hide-public-endpoint $buildParams"
+          fi
+
+          export CONFIG_FILE='./config.yaml'
+          if [ -f $CONFIG_FILE ]; then
+            echo "Config file $CONFIG_FILE exists"
+            export buildParams="--config-file $CONFIG_FILE $buildParams"
           fi
 
           echo ""

@@ -37,13 +37,13 @@ on:
         description: "Number of CPUs"
         type: string
         required: false
-        default: "2"
+        default: ""
 
       memory:
         description: "Memory in GB"
         type: string
         required: false
-        default: "14.5"
+        default: ""
       
       hide_build_logs:
         description: "Hide build logs"
@@ -73,7 +73,6 @@ jobs:
         run: pip install cerebrium
 
       - name: Cerebrium deploy
-        # run: cerebrium deploy ${{env.NAME}} --api-key ${{env.API_KEY}} --hardware ${{env.HARDWARE}} --cpu ${{env.CPU}} --memory ${{env.MEMORY}}
         run: |
           export templatePath="$(pwd)/${{github.event.inputs.template_folder}}"
           echo "Template Path: $templatePath"
@@ -96,7 +95,7 @@ jobs:
             export buildParams="--hide-public-endpoint $buildParams"
           fi
 
-          export CONFIG_FILE='./cerebrium.yaml'
+          export CONFIG_FILE='./config.yaml'
           if [ -f $CONFIG_FILE ]; then
             echo "Config file $CONFIG_FILE exists"
             export buildParams="--config-file $CONFIG_FILE $buildParams"

@@ -134,7 +134,7 @@ jobs:
         id: check_config
         uses: andstor/file-existence-action@v2
         with:
-          files: "${{env.FOLDER}}config.yaml"
+          files: "${{env.FOLDER}}/config.yaml"
 
       - name: print env
         run: |

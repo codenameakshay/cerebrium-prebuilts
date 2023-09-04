@@ -83,12 +83,6 @@ jobs:
           echo ::add-mask::$API_KEY
           echo API_KEY=$API_KEY >> $GITHUB_ENV
 
-      - name: check if config.yaml exists
-        id: check_config
-        uses: andstor/file-existence-action@v2
-        with:
-          files:  $(pwd)/${{github.event.inputs.template_folder}}/config.yaml
-
       - name: Install Cerebrium
         run: pip install cerebrium
 
@@ -118,9 +112,10 @@ jobs:
             export buildParams="--hide-public-endpoint $buildParams"
           fi
 
-          if [ ${{steps.check_config.outputs.files_exists}} = "true" ]; then
+          echo "CONFIG_FILE: $CONFIG_FILE"
+          if [ -f $CONFIG_FILE ]; then
             echo "Config file $CONFIG_FILE exists"
-            export buildParams="--config-file $(pwd)/${{github.event.inputs.template_folder}}/config.yaml $buildParams"
+            export buildParams="--config-file $CONFIG_FILE $buildParams"
 
           cerebrium deploy ${{github.event.inputs.name}} --api-key ${{env.API_KEY}} --hardware ${{github.event.inputs.hardware}} --cpu ${{github.event.inputs.cpu}} --memory ${{github.event.inputs.memory}} $buildParams
   

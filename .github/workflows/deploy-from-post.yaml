@@ -66,6 +66,12 @@ jobs:
           else
             export buildParams="--hide-public-endpoint"
           fi
+          
+          echo ""
+          echo "-----------------------------------------"
+          echo "Deploying to Cerebrium..."
 
+          echo "params:  ${{github.event.client_payload.name}} --api-key ${{env.API_KEY}} --hardware ${{github.event.client_payload.hardware}} --cpu ${{github.event.client_payload.cpu}} --memory ${{github.event.client_payload.memory}} $buildParams|
+        
           cerebrium deploy ${{github.event.client_payload.name}} --api-key ${{env.API_KEY}} --hardware ${{github.event.client_payload.hardware}} --cpu ${{github.event.client_payload.cpu}} --memory ${{github.event.client_payload.memory}} $buildParams
 

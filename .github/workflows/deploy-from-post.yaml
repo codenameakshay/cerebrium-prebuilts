@@ -40,6 +40,11 @@ jobs:
       - name: Cerebrium deploy
         # run: cerebrium deploy ${{env.NAME}} --api-key ${{env.API_KEY}} --hardware ${{env.HARDWARE}} --cpu ${{env.CPU}} --memory ${{env.MEMORY}}
         run: |
+            if [ "${{github.event.client_payload.environment}}" == "dev" ]; then
+                echo "Deploying to dev environment"
+                export ENV=dev
+            fi
+
             export templatePath="$(pwd)/${{github.event.client_payload.template_folder}}"
             echo "Template Path: $templatePath"
             if [ -d $templatePath ]; then

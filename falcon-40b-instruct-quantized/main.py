@@ -18,6 +18,9 @@ model = AutoGPTQForCausalLM.from_quantized(model_name_or_path,
 
 
 
+########################################
+# User-facing API Parameters
+########################################
 class Item(BaseModel):
     prompt: str
     max_length: Optional[int] = 200
@@ -28,7 +31,9 @@ class Item(BaseModel):
     num_return_sequences: Optional[int] = 1
     webhook_endpoint: Optional[HttpUrl] = None
 
-
+#######################################
+# Prediction
+#######################################
 def predict(item, run_id, logger):
     params = Item(**item)
 

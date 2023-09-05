@@ -28,7 +28,9 @@ tokenizer.pad_token_id = 0  # unk. we want this to be different from the eos tok
 tokenizer.padding_side = "left"  # Allow batched inference
 
 
-# Get input params
+########################################
+# User-facing API Parameters
+########################################
 class Item(BaseModel):
     prompt: str
     cutoff_len: Optional[int] = 256
@@ -39,6 +41,9 @@ class Item(BaseModel):
     max_new_tokens: Optional[int] = 256
 
 
+#######################################
+# Initialize the model
+#######################################
 def tokenize(prompt, cutoff_len, add_eos_token=True):
     print("tokenizing: ", prompt)
     return tokenizer(
@@ -73,7 +78,9 @@ def generate(params: Item):
         )
     return tokenizer.decode(outputs.sequences[0], skip_special_tokens=True)
 
-
+#######################################
+# Prediction
+#######################################
 def predict(item, run_id, logger):
     item = Item(**item)
     result = generate(params=item)

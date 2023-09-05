@@ -1,9 +1,9 @@
 %YAML 1.2
 ---
 cpu: 2
-disable_animation: true
+disable_animation: false
 exclude: '[./.*, ./__*]'
-hardware: TURING_5000
+hardware: AMPERE_A5000
 include: '[./*, main.py, requirements.txt, pkglist.txt, conda_pkglist.txt]'
 log_level: INFO
-memory: 14.5
+memory: 30

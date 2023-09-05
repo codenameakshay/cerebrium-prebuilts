@@ -29,8 +29,8 @@ class Item(BaseModel):
 #######################################
 # Initialize the model
 #######################################
-model_id = "stabilityai/stable-diffusion-x4-upscaler"
-pipeline = StableDiffusionUpscalePipeline.from_pretrained(model_id, torch_dtype=torch.float16, revision="fp16")
+hf_model_path = "stabilityai/stable-diffusion-x4-upscaler"
+pipeline = StableDiffusionUpscalePipeline.from_pretrained(hf_model_path, torch_dtype=torch.float16, revision="fp16")
 pipeline.set_use_memory_efficient_attention_xformers(True)
 pipeline = pipeline.to("cuda")
 

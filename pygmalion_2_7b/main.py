@@ -25,11 +25,11 @@ class Item(BaseModel):
 #######################################
 # Model Setup
 #######################################
-model_id = "PygmalionAI/pygmalion-2.7b"
+hf_model_path = "PygmalionAI/pygmalion-2.7b"
 
 # load model and tokenizer
-model = AutoModelForCausalLM.from_pretrained(model_id, torch_dtype=torch.float16, device_map="auto")
-tokenizer = AutoTokenizer.from_pretrained(model_id)
+model = AutoModelForCausalLM.from_pretrained(hf_model_path, torch_dtype=torch.float16, device_map="auto")
+tokenizer = AutoTokenizer.from_pretrained(hf_model_path)
 
 
 class _SentinelTokenStoppingCriteria(StoppingCriteria):

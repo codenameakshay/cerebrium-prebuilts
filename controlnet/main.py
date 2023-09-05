@@ -351,12 +351,12 @@ def predict(item, run_id, logger):
 
         image = Image.fromarray(color_seg)
 
-    model_id = params.model_id if bool(params.model_id) else "runwayml/stable-diffusion-v1-5"
+    hf_model_path = params.model_id if bool(params.model_id) else "runwayml/stable-diffusion-v1-5"
 
     generator = torch.Generator("cuda").manual_seed(params.seed)
     auth_token = params.get("hf_token", False)
     pipe = StableDiffusionControlNetPipeline.from_pretrained(
-        model_id, controlnet=controlnet, torch_dtype=torch.float16, use_auth_token=auth_token
+        hf_model_path, controlnet=controlnet, torch_dtype=torch.float16, use_auth_token=auth_token
     )
 
     pipe.scheduler = UniPCMultistepScheduler.from_config(pipe.scheduler.config)

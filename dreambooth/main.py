@@ -12,7 +12,7 @@ from typing import Optional
 class Item(BaseModel):
     hf_token: Optional[str] = None
     prompt: str
-    model_id: Optional[str] = "stabilityai/stable-diffusion-2-1"
+    hf_model_path: Optional[str] = "stabilityai/stable-diffusion-2-1"
     guidance_scale: float = 7.5
     height: int = 512
     negative_prompt: str = ""
@@ -103,18 +103,18 @@ def run_model(pipe, params, logger):
 ########################################
 def predict(item, run_id, logger):
     params = Item(**item)
-    model_id = params.model_id if bool(params.model_id) else "stabilityai/stable-diffusion-2-1"
-    if model_id == "SG161222/Realistic_Vision_V1.4_Fantasy.ai":
+    hf_model_path = params.model_id if bool(params.model_id) else "stabilityai/stable-diffusion-2-1"
+    if hf_model_path == "SG161222/Realistic_Vision_V1.4_Fantasy.ai":
         images = run_model(pipe=pipe_1, params=params, logger=logger)
-    elif model_id == "GenZArt/jzli-DreamShaper-3.3-baked-vae":
+    elif hf_model_path == "GenZArt/jzli-DreamShaper-3.3-baked-vae":
         images = run_model(pipe=pipe_2, params=params, logger=logger)
-    elif model_id == "stabilityai/stable-diffusion-2-1":
+    elif hf_model_path == "stabilityai/stable-diffusion-2-1":
         images = run_model(pipe=pipe_3, params=params, logger=logger)
     else:
         auth_token = params.get("hf_token", False)
-        scheduler = EulerDiscreteScheduler.from_pretrained(model_id, subfolder="scheduler", use_auth_token=auth_token)
+        scheduler = EulerDiscreteScheduler.from_pretrained(hf_model_path, subfolder="scheduler", use_auth_token=auth_token)
         pipe = StableDiffusionPipeline.from_pretrained(
-            model_id, scheduler=scheduler, torch_dtype=torch.float16, use_auth_token=auth_token
+            hf_model_path, scheduler=scheduler, torch_dtype=torch.float16, use_auth_token=auth_token
         )
         images = run_model(pipe=pipe, params=params, logger=logger)
 

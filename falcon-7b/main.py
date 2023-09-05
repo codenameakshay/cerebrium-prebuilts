@@ -4,6 +4,9 @@ import torch
 from pydantic import BaseModel, HttpUrl
 from typing import Optional
 
+########################################
+# User-facing API Parameters
+########################################
 class Item(BaseModel):
     prompt: str
     max_length: Optional[int] = 200
@@ -13,6 +16,12 @@ class Item(BaseModel):
     repetition_penalty: Optional[float] = 1.0
     num_return_sequences: Optional[int] = 1
     webhook_endpoint: Optional[HttpUrl] = None
+
+
+
+#######################################
+# Initialize the model
+#######################################
 
 
 model = "tiiuae/falcon-7b"
@@ -26,7 +35,9 @@ pipeline = transformers.pipeline(
     trust_remote_code=True,
     device_map="auto",
 )
-
+#######################################
+# Prediction
+#######################################
 def predict(item, run_id, logger):
     params = Item(**item)
     result = pipeline(

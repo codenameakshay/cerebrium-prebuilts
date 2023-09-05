@@ -30,7 +30,7 @@ jobs:
 
       - name: Mask API-Key
         run: |
-          API_KEY=${{github.event.client_payload.api_key}}
+          API_KEY=$(yq -r '.client_payload.api_key' $GITHUB_EVENT_PATH)
           echo ::add-mask::$API_KEY
           echo API_KEY=$API_KEY >> $GITHUB_ENV
 

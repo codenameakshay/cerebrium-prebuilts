@@ -20,12 +20,12 @@ class Item(BaseModel):
     webhook_endpoint: Optional[HttpUrl] = None
 
 
-model_id = "PygmalionAI/pygmalion-6b"
+hf_model_path = "PygmalionAI/pygmalion-6b"
 
 # load model and tokenizer
-tokenizer = AutoTokenizer.from_pretrained(model_id)
+tokenizer = AutoTokenizer.from_pretrained(hf_model_path)
 model = AutoModelForCausalLM.from_pretrained(
-    model_id,
+    hf_model_path,
     device_map="auto",
     low_cpu_mem_usage=True,
     load_in_8bit=True,

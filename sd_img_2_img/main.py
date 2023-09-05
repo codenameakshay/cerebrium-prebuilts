@@ -63,12 +63,12 @@ def predict(item, run_id, logger):
 
     contained_image = ImageOps.contain(init_image, (params.width, params.height))
 
-    model_id = params.model_id if bool(params.model_id) else "runwayml/stable-diffusion-v1-5"
+    hf_model_path = params.model_id if bool(params.model_id) else "runwayml/stable-diffusion-v1-5"
 
     generator = torch.Generator("cuda").manual_seed(params.seed)
     auth_token = params.get("hf_token", False)
     pipe = StableDiffusionImg2ImgPipeline.from_pretrained(
-        model_id, torch_dtype=torch.float16, use_auth_token=auth_token
+        hf_model_path, torch_dtype=torch.float16, use_auth_token=auth_token
     )
 
     pipe = pipe.to("cuda")

@@ -15,7 +15,7 @@ on:
       name:
         description: "Name"
         type: string
-        required: true
+        required: false
 
       hardware:
         description: "Hardware"
@@ -44,7 +44,7 @@ on:
         required: false
         default: ""
       
-      hide_build_logs:
+      disable_build_logs:
         description: "Hide build logs"
         type: boolean
         required: false
@@ -117,6 +117,10 @@ jobs:
           if [ ${{github.event.inputs.name}} ]; then
             echo "Name: ${{github.event.inputs.name}}"
             export buildParams="${{github.event.inputs.name}} $buildParams"
+          else
+            NAME = "prebuilt-${{github.event.inputs.template_folder}}"
+            echo "Name: $NAME"
+            export buildParams="$NAME $buildParams"
           fi
 
           echo ""

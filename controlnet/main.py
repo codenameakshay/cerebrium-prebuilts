@@ -257,7 +257,7 @@ def predict(item, run_id, logger):
 
         image = np.array(init_image)
 
-        image = cv2.Canny(image, params.low_threshold"], params["high_threshold)
+        image = cv2.Canny(image, params.low_threshold, params.high_threshold)
         image = image[:, :, None]
         image = np.concatenate([image, image, image], axis=2)
         image = Image.fromarray(image)

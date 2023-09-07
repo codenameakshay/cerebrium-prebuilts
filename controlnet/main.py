@@ -19,32 +19,22 @@ from transformers import AutoImageProcessor, UperNetForSemanticSegmentation, pip
 #######################################
 class Item(BaseModel):
     prompt: str
-    hf_token: Optional[str]
+    hf_token: Optional[str] = None
+    hf_model_path: Optional[str] = None
     num_inference_steps: Optional[int] = 20
-    num_samples: Optional[float] = 2
     height: Optional[int] = 512
     width: Optional[int] = 512
     guidance_scale: Optional[float] = 7.5
     negative_prompt: Optional[str]
     num_images_per_prompt: Optional[str] = 1
-    image_resolution: Optional[int] = 512
-    strength: Optional[float] = 1.0
-    guess_mode: Optional[bool] = False
     low_threshold: Optional[int] = 100
     high_threshold: Optional[int] = 200
-    ddim_steps: Optional[int] = 20
     scale: Optional[float] = 9.0
     seed: Optional[int] = 1
-    eta: Optional[float] = 0.0
-    hf_model_path: Optional[str]
-    model: str
-    image: Optional[str]
-    file_url: Optional[str]
-    a_prompt: Optional[str] = "best quality, extremely detailed"
-    n_prompt: Optional[
-        str
-    ] = "longbody, lowres, bad anatomy, bad hands, missing fingers, extra digit, fewer digits, cropped, worst quality, low quality"
-    webhook_endpoint: Optional[HttpUrl]
+    model: str = "normal"
+    image: Optional[str] = None
+    file_url: Optional[str] = None
+    webhook_endpoint: Optional[HttpUrl] = None
 
 
 #######################################

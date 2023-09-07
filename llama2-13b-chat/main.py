@@ -11,11 +11,12 @@ base_model_name =  'meta-llama/Llama-2-13b-chat-hf'  # Hugging Face Model Id
 
 try: 
     hf_auth_token = get_secret("hf_auth_token")
+    if hf_auth_token == "":
+        raise Exception("hf_auth_token is empty. You need a hf_auth_token secret added to your account to access this model.")
 except Exception as e:
     print("\n\n")
-    print("Error: ", e)
     print("="*60)
-    print("Please set hf_auth_token in the Secrets tab on your dashboard.")
+    print("Error: ", e)
     print("="*60)
     raise e
 

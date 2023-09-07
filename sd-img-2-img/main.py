@@ -17,7 +17,7 @@ class Item(BaseModel):
     hf_token: Optional[str]
     prompt: str
     image: Optional[str] = None
-    model_id: Optional[str] = "stabilityai/stable-diffusion-2-1"
+    hf_model_path: Optional[str] = "stabilityai/stable-diffusion-2-1"
     guidance_scale: float = 7.5
     height: int = 512
     negative_prompt: str = ""
@@ -63,7 +63,7 @@ def predict(item, run_id, logger):
 
     contained_image = ImageOps.contain(init_image, (params.width, params.height))
 
-    hf_model_path = params.model_id if bool(params.model_id) else "runwayml/stable-diffusion-v1-5"
+    hf_model_path = params.hf_model_path if bool(params.hf_model_path) else "runwayml/stable-diffusion-v1-5"
 
     generator = torch.Generator("cuda").manual_seed(params.seed)
     auth_token = params.get("hf_token", False)

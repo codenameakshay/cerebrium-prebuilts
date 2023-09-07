@@ -12,8 +12,11 @@ base_model_name =  'meta-llama/Llama-2-7b-hf'  # Hugging Face Model Id
 try: 
     hf_auth_token = get_secret("hf_auth_token")
 except Exception as e:
+    print("\n\n")
     print("Error: ", e)
+    print("="*60)
     print("Please set hf_auth_token in the Secrets tab on your dashboard.")
+    print("="*60)
     raise e
 
 huggingface_hub.login(token=hf_auth_token)

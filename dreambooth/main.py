@@ -103,7 +103,7 @@ def run_model(pipe, params, logger):
 ########################################
 def predict(item, run_id, logger):
     params = Item(**item)
-    hf_model_path = params.model_id if bool(params.model_id) else "stabilityai/stable-diffusion-2-1"
+    hf_model_path = params.hf_model_path if bool(params.hf_model_path) else "stabilityai/stable-diffusion-2-1"
     if hf_model_path == "SG161222/Realistic_Vision_V1.4_Fantasy.ai":
         images = run_model(pipe=pipe_1, params=params, logger=logger)
     elif hf_model_path == "GenZArt/jzli-DreamShaper-3.3-baked-vae":

@@ -36,7 +36,7 @@ class Item(BaseModel):
     scale: Optional[float] = 9.0
     seed: Optional[int] = 1
     eta: Optional[float] = 0.0
-    model_id: Optional[str]
+    hf_model_path: Optional[str]
     model: str
     image: Optional[str]
     file_url: Optional[str]
@@ -351,7 +351,7 @@ def predict(item, run_id, logger):
 
         image = Image.fromarray(color_seg)
 
-    hf_model_path = params.model_id if bool(params.model_id) else "runwayml/stable-diffusion-v1-5"
+    hf_model_path = params.hf_model_path if bool(params.hf_model_path) else "runwayml/stable-diffusion-v1-5"
 
     generator = torch.Generator("cuda").manual_seed(params.seed)
     auth_token = params.get("hf_token", False)

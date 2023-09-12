@@ -1,9 +1,11 @@
 import base64
 import io
-import torch
-from diffusers import StableDiffusionPipeline, EulerDiscreteScheduler
-from pydantic import BaseModel, HttpUrl
 from typing import Optional
+
+import torch
+from cerebrium import get_secret
+from diffusers import EulerDiscreteScheduler, StableDiffusionPipeline
+from pydantic import BaseModel, HttpUrl
 
 
 #######################################
@@ -111,7 +113,14 @@ def predict(item, run_id, logger):
     elif hf_model_path == "stabilityai/stable-diffusion-2-1":
         images = run_model(pipe=pipe_3, params=params, logger=logger)
     else:
-        auth_token = params.get("hf_token", False)
+        auth_token =  params.hf_token if params.hf_token else False
+        if not auth_token:
+            print("No hf_auth_token provided, looking for secret")
+            try:
+                auth_token = get_secret("hf_auth_token")
+            except Exception as e:
+                print("No hf_auth_token secret found in account. Setting auth_token to False.")
+
         scheduler = EulerDiscreteScheduler.from_pretrained(hf_model_path, subfolder="scheduler", use_auth_token=auth_token)
         pipe = StableDiffusionPipeline.from_pretrained(
             hf_model_path, scheduler=scheduler, torch_dtype=torch.float16, use_auth_token=auth_token

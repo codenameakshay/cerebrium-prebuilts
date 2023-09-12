@@ -16,14 +16,26 @@ This consists of:
 Additionally, it is adviced to place a small README.md to describe the model and its usage.
 
 ## How to use
+### Deploy using the cerebrium dashboard. 
 The primary method to deploy prebuilt models is using the dashboard.  
+Simply navigate to the pre-built models tab and click `deploy` for the model you would like to deploy!
 
-Alternatively, you can use the Cortex CLI to deploy the model.   
-In the folder containing the desired prebuilt model, run the following command:
+### Deploy with the Cerebrium CLI
+Alternatively, you can use the Cerebrium CLI to deploy the model since each of the models in this repo are, by default, valid Cortex projects.  
+
+- Clone this repo and open your terminal.  
+- `cd` into the folder of the model you would like to deploy.
+- If you have not done so already, login to the Cerebrium CLI by running:
+
 ```bash
-cortex deploy <model_name> --config-file <config_file> 
+cerebrium login <YOUR PRIVATE API KEY>
 ```
+  
+- Deploy your model with the following command:
 
+```bash
+cerebrium deploy <YOUR NAME FOR YOUR MODEL> --config-file config.yaml 
+```
 
 ## How to contribute
 To contribute to this repo, please fork this repo and create a pull request.  

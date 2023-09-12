@@ -6,12 +6,14 @@ from typing import Optional
 import cv2
 import numpy as np
 import torch
+from cerebrium import get_secret
 from controlnet_aux import HEDdetector, MLSDdetector, OpenposeDetector
-from diffusers import ControlNetModel, StableDiffusionControlNetPipeline, UniPCMultistepScheduler
+from diffusers import (ControlNetModel, StableDiffusionControlNetPipeline,
+                       UniPCMultistepScheduler)
 from PIL import Image
 from pydantic import BaseModel, HttpUrl
-from transformers import AutoImageProcessor, UperNetForSemanticSegmentation, pipeline
-
+from transformers import (AutoImageProcessor, UperNetForSemanticSegmentation,
+                          pipeline)
 
 
 #######################################
@@ -344,7 +346,14 @@ def predict(item, run_id, logger):
     hf_model_path = params.hf_model_path if bool(params.hf_model_path) else "runwayml/stable-diffusion-v1-5"
 
     generator = torch.Generator("cuda").manual_seed(params.seed)
-    auth_token = params.get("hf_token", False)
+    auth_token =  params.hf_token if params.hf_token else False
+    if not auth_token:
+        print("No hf_auth_token provided, looking for secret")
+        try:
+            auth_token = get_secret("hf_auth_token")
+        except Exception as e:
+            print("No hf_auth_token secret found in account. Setting auth_token to False.")
+
     pipe = StableDiffusionControlNetPipeline.from_pretrained(
         hf_model_path, controlnet=controlnet, torch_dtype=torch.float16, use_auth_token=auth_token
     )

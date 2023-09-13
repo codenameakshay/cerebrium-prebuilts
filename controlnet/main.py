@@ -28,7 +28,7 @@ class Item(BaseModel):
     width: Optional[int] = 512
     guidance_scale: Optional[float] = 7.5
     negative_prompt: Optional[str] = None
-    num_images_per_prompt: Optional[str] = 1
+    num_images_per_prompt: Optional[int] = 1
     low_threshold: Optional[int] = 100
     high_threshold: Optional[int] = 200
     scale: Optional[float] = 9.0

@@ -15,9 +15,9 @@ from pydantic import BaseModel, HttpUrl
 # User-facing API Parameters
 #######################################
 class Item(BaseModel):
-    hf_token: Optional[str]
     prompt: str
     image: Optional[str] = None
+    hf_token: Optional[str] = None
     hf_model_path: Optional[str] = "stabilityai/stable-diffusion-2-1"
     guidance_scale: float = 7.5
     height: int = 512

@@ -3,3 +3,6 @@ accelerate
 xformers
 einops
 auto-gptq
+bitsandbytes
+scipy
+safetensors

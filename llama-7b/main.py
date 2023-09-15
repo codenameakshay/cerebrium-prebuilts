@@ -6,7 +6,7 @@ from pydantic import BaseModel
 from transformers import LlamaForCausalLM, LlamaTokenizer, GenerationConfig
 
 # Loading in base model and tokenizer
-base_model_name = "decapoda-research/llama2-13b-hf"  # Hugging Face Model Id
+base_model_name = "decapoda-research/llama-7b-hf"  # Hugging Face Model Id
 base_model = LlamaForCausalLM.from_pretrained(
     base_model_name,
     load_in_8bit=True,

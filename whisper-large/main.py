@@ -66,7 +66,7 @@ def save_base64_string_to_file(logger, audio: str):
 # Prediction
 #######################################
 def predict(item, run_id, logger):
-    params = Item(**item).dict()
+    params = Item(**item)
     input_filename = f"{run_id}.mp3"
 
     if params.audio is not None:

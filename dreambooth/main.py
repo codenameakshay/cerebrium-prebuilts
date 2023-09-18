@@ -14,7 +14,7 @@ from pydantic import BaseModel, HttpUrl
 class Item(BaseModel):
     hf_token: Optional[str] = None
     prompt: str
-    hf_model_path: Optional[str] = "stabilityai/stable-diffusion-2-1"
+    hf_model_path: Optional[str] = None
     guidance_scale: float = 7.5
     height: int = 512
     negative_prompt: str = ""
@@ -75,7 +75,12 @@ def predict(item, run_id, logger):
         if bool(params.hf_model_path)
         else "stabilityai/stable-diffusion-2-1"
     )
+    global scheduler
+    global pipe
+    global old_hf_model_path
+
     if hf_model_path == old_hf_model_path:
+        logger.info("No change in model path. Using existing model...")
         images = run_model(pipe=pipe, params=params, logger=logger)
     else:
         auth_token = params.hf_token if params.hf_token else False
@@ -87,10 +92,6 @@ def predict(item, run_id, logger):
                 print(
                     "No hf_auth_token secret found in account. Setting auth_token to False."
                 )
-
-        global scheduler
-        global pipe
-        global old_hf_model_path
         scheduler = EulerDiscreteScheduler.from_pretrained(
             hf_model_path, subfolder="scheduler", use_auth_token=auth_token
         )

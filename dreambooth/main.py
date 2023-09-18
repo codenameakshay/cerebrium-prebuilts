@@ -29,47 +29,12 @@ class Item(BaseModel):
 # Model Setup
 #######################################
 
-set_auth_token = "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"
-scheduler_1 = EulerDiscreteScheduler.from_pretrained(
-    "SG161222/Realistic_Vision_V1.4_Fantasy.ai",
-    subfolder="scheduler",
-    use_auth_token=set_auth_token,
-    cache_dir="/persistent-storage",
+old_hf_model_path = "stabilityai/stable-diffusion-2-1"
+scheduler = EulerDiscreteScheduler.from_pretrained(
+    old_hf_model_path, subfolder="scheduler"
 )
-pipe_1 = StableDiffusionPipeline.from_pretrained(
-    "SG161222/Realistic_Vision_V1.4_Fantasy.ai",
-    scheduler=scheduler_1,
-    torch_dtype=torch.float16,
-    use_auth_token=set_auth_token,
-    cache_dir="/persistent-storage",
-)
-
-scheduler_2 = EulerDiscreteScheduler.from_pretrained(
-    "GenZArt/jzli-DreamShaper-3.3-baked-vae",
-    subfolder="scheduler",
-    use_auth_token=set_auth_token,
-    cache_dir="/persistent-storage",
-)
-pipe_2 = StableDiffusionPipeline.from_pretrained(
-    "GenZArt/jzli-DreamShaper-3.3-baked-vae",
-    scheduler=scheduler_2,
-    torch_dtype=torch.float16,
-    use_auth_token=set_auth_token,
-    cache_dir="/persistent-storage",
-)
-
-scheduler_3 = EulerDiscreteScheduler.from_pretrained(
-    "stabilityai/stable-diffusion-2-1",
-    subfolder="scheduler",
-    use_auth_token=set_auth_token,
-    cache_dir="/persistent-storage",
-)
-pipe_3 = StableDiffusionPipeline.from_pretrained(
-    "stabilityai/stable-diffusion-2-1",
-    scheduler=scheduler_3,
-    torch_dtype=torch.float16,
-    use_auth_token=set_auth_token,
-    cache_dir="/persistent-storage",
+pipe = StableDiffusionPipeline.from_pretrained(
+    old_hf_model_path, scheduler=scheduler, torch_dtype=torch.float16
 )
 
 
@@ -105,27 +70,38 @@ def run_model(pipe, params, logger):
 ########################################
 def predict(item, run_id, logger):
     params = Item(**item)
-    hf_model_path = params.hf_model_path if bool(params.hf_model_path) else "stabilityai/stable-diffusion-2-1"
-    if hf_model_path == "SG161222/Realistic_Vision_V1.4_Fantasy.ai":
-        images = run_model(pipe=pipe_1, params=params, logger=logger)
-    elif hf_model_path == "GenZArt/jzli-DreamShaper-3.3-baked-vae":
-        images = run_model(pipe=pipe_2, params=params, logger=logger)
-    elif hf_model_path == "stabilityai/stable-diffusion-2-1":
-        images = run_model(pipe=pipe_3, params=params, logger=logger)
+    hf_model_path = (
+        params.hf_model_path
+        if bool(params.hf_model_path)
+        else "stabilityai/stable-diffusion-2-1"
+    )
+    if hf_model_path == old_hf_model_path:
+        images = run_model(pipe=pipe, params=params, logger=logger)
     else:
-        auth_token =  params.hf_token if params.hf_token else False
+        auth_token = params.hf_token if params.hf_token else False
         if not auth_token:
             print("No hf_auth_token provided, looking for secret")
             try:
                 auth_token = get_secret("hf_auth_token")
             except Exception as e:
-                print("No hf_auth_token secret found in account. Setting auth_token to False.")
+                print(
+                    "No hf_auth_token secret found in account. Setting auth_token to False."
+                )
 
-        scheduler = EulerDiscreteScheduler.from_pretrained(hf_model_path, subfolder="scheduler", use_auth_token=auth_token)
+        global scheduler
+        global pipe
+        global old_hf_model_path
+        scheduler = EulerDiscreteScheduler.from_pretrained(
+            hf_model_path, subfolder="scheduler", use_auth_token=auth_token
+        )
         pipe = StableDiffusionPipeline.from_pretrained(
-            hf_model_path, scheduler=scheduler, torch_dtype=torch.float16, use_auth_token=auth_token
+            hf_model_path,
+            scheduler=scheduler,
+            torch_dtype=torch.float16,
+            use_auth_token=auth_token,
         )
         images = run_model(pipe=pipe, params=params, logger=logger)
+        old_hf_model_path = hf_model_path
 
     finished_images = []
     for image in images:

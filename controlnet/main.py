@@ -429,7 +429,7 @@ def predict(item, run_id, logger):
         "DEIS": lambda config: DEISMultistepScheduler.from_config(config),
     }
 
-    pipe.scheduler = SAMPLER_MAP[params.sampler].from_config(
+    pipe.scheduler = SAMPLER_MAP[params.sampler](
         pipe.scheduler.config)
     pipe.enable_model_cpu_offload()
     pipe.enable_xformers_memory_efficient_attention()

@@ -1,5 +1,7 @@
 import base64
 import io
+import gradio as gr
+import qrcode
 from io import BytesIO
 from typing import Optional
 
@@ -8,8 +10,15 @@ import numpy as np
 import torch
 from cerebrium import get_secret
 from controlnet_aux import HEDdetector, MLSDdetector, OpenposeDetector
-from diffusers import (ControlNetModel, StableDiffusionControlNetPipeline,
-                       UniPCMultistepScheduler)
+from diffusers import (StableDiffusionControlNetPipeline,
+                       ControlNetModel,
+                       DDIMScheduler,
+                       DPMSolverMultistepScheduler,
+                       DEISMultistepScheduler,
+                       HeunDiscreteScheduler,
+                       EulerDiscreteScheduler,
+                       EulerAncestralDiscreteScheduler,
+                       )
 from PIL import Image
 from pydantic import BaseModel, HttpUrl
 from transformers import (AutoImageProcessor, UperNetForSemanticSegmentation,
@@ -21,6 +30,8 @@ from transformers import (AutoImageProcessor, UperNetForSemanticSegmentation,
 #######################################
 class Item(BaseModel):
     prompt: str
+    sampler: Optional[str] = "Euler a"
+    content: Optional[str] = None
     hf_token: Optional[str] = None
     hf_model_path: Optional[str] = None
     num_inference_steps: Optional[int] = 20
@@ -62,11 +73,14 @@ def download_file_from_url(logger, url: str, filename: str):
         logger.info(response)
         raise Exception("Download failed")
 
+
 openposeDetector = OpenposeDetector.from_pretrained("lllyasviel/ControlNet")
 hed = HEDdetector.from_pretrained("lllyasviel/ControlNet")
 mlsd = MLSDdetector.from_pretrained("lllyasviel/ControlNet")
-image_processor = AutoImageProcessor.from_pretrained("openmmlab/upernet-convnext-small")
-image_segmentor = UperNetForSemanticSegmentation.from_pretrained("openmmlab/upernet-convnext-small")
+image_processor = AutoImageProcessor.from_pretrained(
+    "openmmlab/upernet-convnext-small")
+image_segmentor = UperNetForSemanticSegmentation.from_pretrained(
+    "openmmlab/upernet-convnext-small")
 
 
 def ade_palette():
@@ -225,9 +239,37 @@ def ade_palette():
     ]
 
 
+def create_code(content: str):
+    qr = qrcode.QRCode(
+        version=1,
+        error_correction=qrcode.constants.ERROR_CORRECT_H,
+        box_size=16,
+        border=0,
+    )
+    qr.add_data(content)
+    qr.make(fit=True)
+    img = qr.make_image(fill_color="black", back_color="white")
+
+    # find smallest image size multiple of 256 that can fit qr
+    offset_min = 8 * 16
+    w, h = img.size
+    w = (w + 255 + offset_min) // 256 * 256
+    h = (h + 255 + offset_min) // 256 * 256
+    if w > 1024:
+        raise gr.Error("QR code is too large, please use a shorter content")
+    bg = Image.new('L', (w, h), 128)
+
+    # align on 16px grid
+    coords = ((w - img.size[0]) // 2 // 16 * 16,
+              (h - img.size[1]) // 2 // 16 * 16)
+    bg.paste(img, coords)
+    return bg
+
 #######################################
 # Prediction
 #######################################
+
+
 def predict(item, run_id, logger):
     params = Item(**item)
     logger.info("Downloading file...")
@@ -237,14 +279,19 @@ def predict(item, run_id, logger):
         init_image = Image.open(image)
     elif params.image is not None:
         init_image = Image.open(BytesIO(base64.b64decode(params.image)))
-    else: 
-        raise Exception("No image or file_url provided")
+    elif params.content is not None:
+        logger.info("Generating QR Code from content")
+        qrcode_image = create_code(params.content)
+        init_image = qrcode_image
+    else:
+        raise Exception("No image or content or file_url provided")
 
     logger.info("Running ControlNet...")
 
     if params.model == "canny":
         controlnet = ControlNetModel.from_pretrained(
-            "fusing/stable-diffusion-v1-5-controlnet-canny", torch_dtype=torch.float16, cache_dir="/persistent-storage"
+            "fusing/stable-diffusion-v1-5-controlnet-canny",
+            torch_dtype=torch.float16, cache_dir="/persistent-storage"
         )
 
         image = np.array(init_image)
@@ -293,7 +340,8 @@ def predict(item, run_id, logger):
         )
 
     elif params.model == "normal":
-        depth_estimator = pipeline("depth-estimation", model="Intel/dpt-hybrid-midas")
+        depth_estimator = pipeline(
+            "depth-estimation", model="Intel/dpt-hybrid-midas")
         image = depth_estimator(init_image)["predicted_depth"][0]
 
         image = image.numpy()
@@ -330,16 +378,20 @@ def predict(item, run_id, logger):
         image = hed(init_image, scribble=True)
 
     elif params.model == "seg":
-        controlnet = ControlNetModel.from_pretrained("lllyasviel/sd-controlnet-seg", torch_dtype=torch.float16)
+        controlnet = ControlNetModel.from_pretrained(
+            "lllyasviel/sd-controlnet-seg", torch_dtype=torch.float16)
 
-        pixel_values = image_processor(init_image.convert("RGB"), return_tensors="pt").pixel_values
+        pixel_values = image_processor(init_image.convert(
+            "RGB"), return_tensors="pt").pixel_values
 
         with torch.no_grad():
             outputs = image_segmentor(pixel_values)
 
-        seg = image_processor.post_process_semantic_segmentation(outputs, target_sizes=[init_image.size[::-1]])[0]
+        seg = image_processor.post_process_semantic_segmentation(
+            outputs, target_sizes=[init_image.size[::-1]])[0]
 
-        color_seg = np.zeros((seg.shape[0], seg.shape[1], 3), dtype=np.uint8)  # height, width, 3
+        # height, width, 3
+        color_seg = np.zeros((seg.shape[0], seg.shape[1], 3), dtype=np.uint8)
 
         palette = np.array(ade_palette())
 
@@ -350,22 +402,35 @@ def predict(item, run_id, logger):
 
         image = Image.fromarray(color_seg)
 
-    hf_model_path = params.hf_model_path if bool(params.hf_model_path) else "runwayml/stable-diffusion-v1-5"
+    hf_model_path = params.hf_model_path if bool(
+        params.hf_model_path) else "runwayml/stable-diffusion-v1-5"
 
     generator = torch.Generator("cuda").manual_seed(params.seed)
-    auth_token =  params.hf_token if params.hf_token else False
+    auth_token = params.hf_token if params.hf_token else False
     if not auth_token:
-        print("No hf_auth_token provided, looking for secret")
+        logger.info("No hf_auth_token provided, looking for secret")
         try:
             auth_token = get_secret("hf_auth_token")
         except Exception as e:
-            print("No hf_auth_token secret found in account. Setting auth_token to False.")
+            logger.info(
+                "No hf_auth_token secret found in account. Setting auth_token to False.")
 
     pipe = StableDiffusionControlNetPipeline.from_pretrained(
         hf_model_path, controlnet=controlnet, torch_dtype=torch.float16, use_auth_token=auth_token
     )
 
-    pipe.scheduler = UniPCMultistepScheduler.from_config(pipe.scheduler.config)
+    SAMPLER_MAP = {
+        "DPM++ Karras SDE": lambda config: DPMSolverMultistepScheduler.from_config(config, use_karras=True, algorithm_type="sde-dpmsolver++"),
+        "DPM++ Karras": lambda config: DPMSolverMultistepScheduler.from_config(config, use_karras=True),
+        "Heun": lambda config: HeunDiscreteScheduler.from_config(config),
+        "Euler a": lambda config: EulerAncestralDiscreteScheduler.from_config(config),
+        "Euler": lambda config: EulerDiscreteScheduler.from_config(config),
+        "DDIM": lambda config: DDIMScheduler.from_config(config),
+        "DEIS": lambda config: DEISMultistepScheduler.from_config(config),
+    }
+
+    pipe.scheduler = SAMPLER_MAP[params.sampler].from_config(
+        pipe.scheduler.config)
     pipe.enable_model_cpu_offload()
     pipe.enable_xformers_memory_efficient_attention()
 
@@ -385,6 +450,12 @@ def predict(item, run_id, logger):
     for image in images:
         buffered = io.BytesIO()
         image.save(buffered, format="PNG")
-        finished_images.append(base64.b64encode(buffered.getvalue()).decode("utf-8"))
+        finished_images.append(base64.b64encode(
+            buffered.getvalue()).decode("utf-8"))
+
+    buffered_i = io.BytesIO()
+    init_image.save(buffered_i, format="PNG")
+    finished_images.insert(0, base64.b64encode(
+        buffered_i.getvalue()).decode("utf-8"))
 
     return finished_images

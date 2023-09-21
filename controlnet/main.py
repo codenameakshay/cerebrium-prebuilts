@@ -241,14 +241,14 @@ def ade_palette():
 
 def create_code(content: str):
     qr = qrcode.QRCode(
-        version=1,
+        version=3,
         error_correction=qrcode.constants.ERROR_CORRECT_H,
-        box_size=16,
-        border=4,
+        box_size=24,
+        border=8,
     )
     qr.add_data(content)
     qr.make(fit=True)
-    img = qr.make_image(fill_color="cyan", back_color="yellow")
+    img = qr.make_image(fill_color="white", back_color="black")
 
     # find smallest image size multiple of 256 that can fit qr
     offset_min = 8 * 16
@@ -257,7 +257,7 @@ def create_code(content: str):
     h = (h + 255 + offset_min) // 256 * 256
     if w > 1024:
         raise gr.Error("QR code is too large, please use a shorter content")
-    bg = Image.new('L', (w, h), 128)
+    bg = Image.new('L', (w, h))
 
     # align on 16px grid
     coords = ((w - img.size[0]) // 2 // 16 * 16,

@@ -244,11 +244,11 @@ def create_code(content: str):
         version=1,
         error_correction=qrcode.constants.ERROR_CORRECT_H,
         box_size=16,
-        border=0,
+        border=4,
     )
     qr.add_data(content)
     qr.make(fit=True)
-    img = qr.make_image(fill_color="black", back_color="white")
+    img = qr.make_image(fill_color="cyan", back_color="yellow")
 
     # find smallest image size multiple of 256 that can fit qr
     offset_min = 8 * 16

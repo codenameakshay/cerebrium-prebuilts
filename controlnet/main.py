@@ -463,4 +463,9 @@ def predict(item, run_id, logger):
     finished_images.insert(0, base64.b64encode(
         buffered_i.getvalue()).decode("utf-8"))
 
+    buffered_ii = io.BytesIO()
+    image.save(buffered_ii, format="PNG")
+    finished_images.insert(1, base64.b64encode(
+        buffered_ii.getvalue()).decode("utf-8"))
+
     return finished_images

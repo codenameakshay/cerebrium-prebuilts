@@ -241,10 +241,10 @@ def ade_palette():
 
 def create_code(content: str):
     qr = qrcode.QRCode(
-        version=3,
+        version=1,
         error_correction=qrcode.constants.ERROR_CORRECT_H,
-        box_size=24,
-        border=8,
+        box_size=16,
+        border=0,
     )
     qr.add_data(content)
     qr.make(fit=True)

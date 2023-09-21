@@ -306,7 +306,12 @@ def predict(item, run_id, logger):
             "monster-labs/control_v1p_sd15_qrcode_monster", torch_dtype=torch.float16, cache_dir="/persistent-storage"
         )
 
-        image = init_image
+        image = np.array(init_image)
+
+        image = cv2.Canny(image, params.low_threshold, params.high_threshold)
+        image = image[:, :, None]
+        image = np.concatenate([image, image, image], axis=2)
+        image = Image.fromarray(image)
 
     elif params.model == "openpose":
         controlnet = ControlNetModel.from_pretrained(

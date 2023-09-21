@@ -452,11 +452,6 @@ def predict(item, run_id, logger):
     ).images
 
     finished_images = []
-    for image in images:
-        buffered = io.BytesIO()
-        image.save(buffered, format="PNG")
-        finished_images.append(base64.b64encode(
-            buffered.getvalue()).decode("utf-8"))
 
     buffered_i = io.BytesIO()
     init_image.save(buffered_i, format="PNG")
@@ -467,5 +462,11 @@ def predict(item, run_id, logger):
     image.save(buffered_ii, format="PNG")
     finished_images.insert(1, base64.b64encode(
         buffered_ii.getvalue()).decode("utf-8"))
+
+    for image in images:
+        buffered = io.BytesIO()
+        image.save(buffered, format="PNG")
+        finished_images.append(base64.b64encode(
+            buffered.getvalue()).decode("utf-8"))
 
     return finished_images
